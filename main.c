@@ -7,7 +7,8 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-int main() {
+int main()
+{
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         printf("WSAStartup failed. Error Code: %d\n", WSAGetLastError());
@@ -31,22 +32,25 @@ int main() {
     myaddr.sin_port = htons(port);
     myaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-    if (bind(socket_fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) == SOCKET_ERROR){
+    if (bind(socket_fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) == SOCKET_ERROR) {
         printf("Bind failed. Error Code: %d\n", WSAGetLastError());
         closesocket(socket_fd);
         WSACleanup();
         exit(EXIT_FAILURE);
     }
 
-    addr_size = sizeof(remoteAddr);
+    while(1) {
+        addr_size = sizeof(remoteAddr);
 
-    memset(buffer, '\0', sizeof(buffer));
-    int bytes_received = recvfrom(socket_fd, buffer, 1023, 0, (struct sockaddr *)&remoteAddr, &addr_size);
-    if(bytes_received == SOCKET_ERROR) {
-        buffer[bytes_received] = '\0';
-        printf("Got data from %s:", buffer);
-    } else {
-        printf("REcvfrom failed. Error Code: %d\n", WSAGetLastError());
+        memset(buffer, '\0', sizeof(buffer));
+        int bytes_received = recvfrom(socket_fd, buffer, 1023, 0, (struct sockaddr *)&remoteAddr, &addr_size);
+        if (bytes_received != SOCKET_ERROR) {
+            buffer[bytes_received] = '\0';
+            printf("Received: %s", buffer);
+        }
+        else {
+            printf("Recvfrom failed. Error Code: %d\n", WSAGetLastError());
+        }
     }
 
     closesocket(socket_fd);
